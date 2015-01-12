@@ -132,8 +132,8 @@ State::State():
 State::~State()
 {
     // delete the GLExtensions object associated with this osg::State.
-    GLExtensions::Set(_contextID, 0);
-    _glExtensions = 0;
+    // GLExtensions::Set(_contextID, 0);
+    // _glExtensions = 0;
 
     //_texCoordArrayList.clear();
 
@@ -922,8 +922,8 @@ void State::initializeExtensionProcs()
 {
     if (_extensionProcsInitialized) return;
 
-    _glExtensions = new GLExtensions(_contextID);
-    GLExtensions::Set(_contextID, _glExtensions.get());
+	_glExtensions = GLExtensions::Get(_contextID, true);	// new GLExtensions(_contextID);
+    // GLExtensions::Set(_contextID, _glExtensions.get());
 
     setGLExtensionFuncPtr(_glClientActiveTexture,"glClientActiveTexture","glClientActiveTextureARB");
     setGLExtensionFuncPtr(_glActiveTexture, "glActiveTexture","glActiveTextureARB");
@@ -942,13 +942,14 @@ void State::initializeExtensionProcs()
     setGLExtensionFuncPtr(_glDrawArraysInstanced, "glDrawArraysInstanced","glDrawArraysInstancedARB","glDrawArraysInstancedEXT");
     setGLExtensionFuncPtr(_glDrawElementsInstanced, "glDrawElementsInstanced","glDrawElementsInstancedARB","glDrawElementsInstancedEXT");
 
-    if ( osg::getGLVersionNumber() >= 2.0 || osg::isGLExtensionSupported(_contextID,"GL_ARB_vertex_shader") || OSG_GLES2_FEATURES)
+    if ( osg::getGLVersionNumber() >= 2.0 || osg::isGLExtensionSupported(_contextID,"GL_ARB_vertex_shader") || OSG_GLES2_FEATURES || OSG_GL3_FEATURES)
     {
         glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,&_glMaxTextureUnits);
-        if(OSG_GLES2_FEATURES)
-            _glMaxTextureCoords = _glMaxTextureUnits;
-        else
-            glGetIntegerv(GL_MAX_TEXTURE_COORDS,&_glMaxTextureCoords);
+#ifdef FIXED_FUNCTION_AVAILABLE
+        glGetIntegerv(GL_MAX_TEXTURE_COORDS, &_glMaxTextureCoords);
+#else
+        _glMaxTextureCoords = _glMaxTextureUnits;
+#endif
     }
     else if ( osg::getGLVersionNumber() >= 1.3 ||
                                  osg::isGLExtensionSupported(_contextID,"GL_ARB_multitexture") ||
