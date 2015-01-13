@@ -41,7 +41,9 @@ Text::Text():
     _colorGradientBottomLeft(0.0f, 1.0f, 0.0f, 1.0f),
     _colorGradientBottomRight(0.0f, 0.0f, 1.0f, 1.0f),
     _colorGradientTopRight(1.0f, 1.0f, 1.0f, 1.0f)
-{}
+{
+    _supportsVertexBufferObjects = true;
+}
 
 Text::Text(const Text& text,const osg::CopyOp& copyop):
     osgText::TextBase(text,copyop),
@@ -57,6 +59,7 @@ Text::Text(const Text& text,const osg::CopyOp& copyop):
     _colorGradientBottomRight(text._colorGradientBottomRight),
     _colorGradientTopRight(text._colorGradientTopRight)
 {
+    _supportsVertexBufferObjects = true;
     computeGlyphRepresentation();
 }
 
@@ -519,6 +522,17 @@ void Text::computeGlyphRepresentation()
 
         ++lineNumber;
 
+    }
+
+    for(TextureGlyphQuadMap::iterator titr=_textureGlyphQuadMap.begin();
+        titr!=_textureGlyphQuadMap.end();
+        ++titr)
+    {
+        titr->second.updateQuadIndices();
+        if (_useVertexBufferObjects)
+        {
+            titr->second.initGPUBufferObjects();
+        }
     }
 
     TextBase::computePositions();
@@ -1573,8 +1587,7 @@ void Text::drawForegroundText(osg::State& state, const GlyphQuads& glyphquad, co
             state.setColorPointer(glyphquad._colorCoords);
         }
 
-        state.drawQuads(0, transformedCoords->size());
-
+        glyphquad._quadIndices->draw(state, _useVertexBufferObjects);
     }
 }
 
@@ -1659,7 +1672,7 @@ void Text::drawTextWithBackdrop(osg::State& state, const osg::Vec4& colorMultipl
                 if (!transformedBackdropCoords->empty())
                 {
                     state.setVertexPointer(transformedBackdropCoords);
-                    state.drawQuads(0,transformedBackdropCoords->size());
+                    glyphquad._quadIndices->draw(state, _useVertexBufferObjects);
                 }
             }
         }
@@ -2011,24 +2024,63 @@ void Text::renderWithStencilBuffer(osg::State& state, const osg::Vec4& colorMult
 
 Text::GlyphQuads::GlyphQuads()
 {
-    osg::VertexBufferObject* vbo = new osg::VertexBufferObject();
     _coords = new osg::Vec2Array();
-    _coords->setVertexBufferObject(vbo);
     _texcoords = new osg::Vec2Array();
-    _texcoords->setVertexBufferObject(vbo);
     _colorCoords = new osg::Vec4Array();
-    _colorCoords->setVertexBufferObject(vbo);
     for (size_t i = 0; i < _transformedCoords.size(); i++)
     {
         _transformedCoords[i] = new osg::Vec3Array();
-        _transformedCoords[i]->setVertexBufferObject(vbo);
     }
     for (int j = 0; j < 8; j++)
     {
         for (size_t i = 0; i < _transformedBackdropCoords[j].size(); i++)
         {
             _transformedBackdropCoords[j][i] = new osg::Vec3Array();
+        }
+    }
+
+    _quadIndices = new DrawElementsUInt(PrimitiveSet::TRIANGLES);
+}
+
+void Text::GlyphQuads::updateQuadIndices()
+{
+    _quadIndices->clear();
+    if (_coords->size() % 4 != 0)
+        OSG_WARN << "size of _coords is not divisible by 4.";
+    for (unsigned int i = 0; i < (unsigned int)_coords->size(); i += 4)
+    {
+        _quadIndices->push_back(i);
+        _quadIndices->push_back(i + 1);
+        _quadIndices->push_back(i + 3);
+
+        _quadIndices->push_back(i + 1);
+        _quadIndices->push_back(i + 2);
+        _quadIndices->push_back(i + 3);
+    }
+}
+
+void Text::GlyphQuads::initGPUBufferObjects()
+{
+    osg::VertexBufferObject* vbo = new osg::VertexBufferObject();
+    _coords->setBinding(osg::Array::BIND_PER_VERTEX);
+    _coords->setVertexBufferObject(vbo);
+    _texcoords->setBinding(osg::Array::BIND_PER_VERTEX);
+    _texcoords->setVertexBufferObject(vbo);
+    _colorCoords->setBinding(osg::Array::BIND_PER_VERTEX);
+    _colorCoords->setVertexBufferObject(vbo);
+    for (size_t i = 0; i < _transformedCoords.size(); i++)
+    {
+        _transformedCoords[i]->setBinding(osg::Array::BIND_PER_VERTEX);
+        _transformedCoords[i]->setVertexBufferObject(vbo);
+    }
+    for (int j = 0; j < 8; j++)
+    {
+        for (size_t i = 0; i < _transformedBackdropCoords[j].size(); i++)
+        {
+            _transformedBackdropCoords[j][i]->setBinding(osg::Array::BIND_PER_VERTEX);
             _transformedBackdropCoords[j][i]->setVertexBufferObject(vbo);
         }
     }
+
+    _quadIndices->setElementBufferObject(new osg::ElementBufferObject());
 }

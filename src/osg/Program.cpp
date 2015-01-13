@@ -134,6 +134,9 @@ void Program::ProgramBinary::assign(unsigned int size, const unsigned char* data
 // osg::Program
 ///////////////////////////////////////////////////////////////////////////
 
+#ifndef GL_SEPARATE_ATTRIBS
+#define GL_SEPARATE_ATTRIBS 0x8C8D
+#endif
 Program::Program() :
     _geometryVerticesOut(1), _geometryInputType(GL_TRIANGLES),
     _geometryOutputType(GL_TRIANGLE_STRIP),

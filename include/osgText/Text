@@ -313,7 +313,12 @@ public:
         osg::buffered_object<Coords3>   _transformedBackdropCoords[8];
         ColorCoords    _colorCoords;
 
+        osg::ref_ptr<osg::DrawElementsUInt> _quadIndices;
+        void updateQuadIndices();
+
         GlyphQuads();
+
+		void initGPUBufferObjects();
 
         Glyphs getGlyphs() { return _glyphs; }
         const Glyphs getGlyphs() const { return _glyphs; }
