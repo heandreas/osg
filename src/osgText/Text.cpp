@@ -59,7 +59,6 @@ Text::Text(const Text& text,const osg::CopyOp& copyop):
     _colorGradientBottomRight(text._colorGradientBottomRight),
     _colorGradientTopRight(text._colorGradientTopRight)
 {
-    _supportsVertexBufferObjects = true;
     computeGlyphRepresentation();
 }
 
