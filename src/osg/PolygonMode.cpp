@@ -74,12 +74,12 @@ void PolygonMode::apply(State&) const
     }
     else
     {
-#ifdef OSG_GL1_AVAILABLE
-        glPolygonMode(GL_FRONT,(GLenum)_modeFront);
-        glPolygonMode(GL_BACK,(GLenum)_modeBack);
-#else
-        OSG_NOTICE << "Warning: PolygonMode::apply(State&) - only GL_FRONT_AND_BACK is supported." << std::endl;
-#endif
+        #ifdef OSG_GL1_AVAILABLE
+                glPolygonMode(GL_FRONT,(GLenum)_modeFront);
+                glPolygonMode(GL_BACK,(GLenum)_modeBack);
+        #else
+            OSG_NOTICE << "Warning: PolygonMode::apply(State&) - only GL_FRONT_AND_BACK is supported." << std::endl;
+        #endif
     }
 }
 
