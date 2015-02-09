@@ -1400,6 +1400,10 @@ void Text::drawImplementation(osg::State& state, const osg::Vec4& colorMultiplie
         {
             renderWithDelayedDepthWrites(state,colorMultiplier);
         }
+
+        // unbind buffers if necessary
+        state.unbindVertexBufferObject();
+        state.unbindElementBufferObject();
     }
 
     if (_drawMode & BOUNDINGBOX)
@@ -1717,19 +1721,19 @@ void Text::renderWithPolygonOffset(osg::State& state, const osg::Vec4& colorMult
             max_backdrop_index = _backdropType+1;
         }
 
-        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords.front()));
+        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords->front()));
         state.disableColorPointer();
         state.Color(_backdropColor.r(),_backdropColor.g(),_backdropColor.b(),_backdropColor.a());
 
         for( ; backdrop_index < max_backdrop_index; backdrop_index++)
         {
             const GlyphQuads::Coords3& transformedBackdropCoords = glyphquad._transformedBackdropCoords[backdrop_index][contextID];
-            if (!transformedBackdropCoords.empty())
+            if (!transformedBackdropCoords->empty())
             {
-                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords.front()));
+                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords->front()));
                 glPolygonOffset(0.1f * osg::PolygonOffset::getFactorMultiplier(),
                                 osg::PolygonOffset::getUnitsMultiplier() * (max_backdrop_index-backdrop_index) );
-                state.drawQuads(0,transformedBackdropCoords.size());
+                state.drawQuads(0,transformedBackdropCoords->size());
             }
         }
 
@@ -1776,17 +1780,17 @@ void Text::renderWithNoDepthBuffer(osg::State& state, const osg::Vec4& colorMult
             max_backdrop_index = _backdropType+1;
         }
 
-        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords.front()));
+        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords->front()));
         state.disableColorPointer();
         state.Color(_backdropColor.r(),_backdropColor.g(),_backdropColor.b(),_backdropColor.a());
 
         for( ; backdrop_index < max_backdrop_index; backdrop_index++)
         {
             const GlyphQuads::Coords3& transformedBackdropCoords = glyphquad._transformedBackdropCoords[backdrop_index][contextID];
-            if (!transformedBackdropCoords.empty())
+            if (!transformedBackdropCoords->empty())
             {
-                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords.front()));
-                state.drawQuads(0,transformedBackdropCoords.size());
+                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords->front()));
+                state.drawQuads(0,transformedBackdropCoords->size());
             }
         }
 
@@ -1832,20 +1836,20 @@ void Text::renderWithDepthRange(osg::State& state, const osg::Vec4& colorMultipl
             max_backdrop_index = _backdropType+1;
         }
 
-        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords.front()));
+        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords->front()));
         state.disableColorPointer();
         state.Color(_backdropColor.r(),_backdropColor.g(),_backdropColor.b(),_backdropColor.a());
 
         for( ; backdrop_index < max_backdrop_index; backdrop_index++)
         {
             const GlyphQuads::Coords3& transformedBackdropCoords = glyphquad._transformedBackdropCoords[backdrop_index][contextID];
-            if (!transformedBackdropCoords.empty())
+            if (!transformedBackdropCoords->empty())
             {
-                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords.front()));
+                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords->front()));
                 double offset = double(max_backdrop_index-backdrop_index)*0.0001;
                 glDepthRange( offset, 1.0+offset);
 
-                state.drawQuads(0,transformedBackdropCoords.size());
+                state.drawQuads(0,transformedBackdropCoords->size());
             }
         }
 
@@ -1931,26 +1935,26 @@ void Text::renderWithStencilBuffer(osg::State& state, const osg::Vec4& colorMult
             max_backdrop_index = _backdropType+1;
         }
 
-        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords.front()));
+        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords->front()));
         state.disableColorPointer();
 
         for( ; backdrop_index < max_backdrop_index; backdrop_index++)
         {
             const GlyphQuads::Coords3& transformedBackdropCoords = glyphquad._transformedBackdropCoords[backdrop_index][contextID];
-            if (!transformedBackdropCoords.empty())
+            if (!transformedBackdropCoords->empty())
             {
-                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords.front()));
-                state.drawQuads(0,transformedBackdropCoords.size());
+                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords->front()));
+                state.drawQuads(0,transformedBackdropCoords->size());
             }
         }
 
         // Draw the foreground text
         const GlyphQuads::Coords3& transformedCoords = glyphquad._transformedCoords[contextID];
-        if (!transformedCoords.empty())
+        if (!transformedCoords->empty())
         {
-            state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedCoords.front()));
-            state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords.front()));
-            state.drawQuads(0,transformedCoords.size());
+            state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedCoords->front()));
+            state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords->front()));
+            state.drawQuads(0, transformedCoords->size());
         }
     }
 
@@ -1998,17 +2002,17 @@ void Text::renderWithStencilBuffer(osg::State& state, const osg::Vec4& colorMult
             max_backdrop_index = _backdropType+1;
         }
 
-        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords.front()));
+        state.setTexCoordPointer( 0, 2, GL_FLOAT, 0, &(glyphquad._texcoords->front()));
         state.disableColorPointer();
         state.Color(_backdropColor.r(),_backdropColor.g(),_backdropColor.b(),_backdropColor.a());
 
         for( ; backdrop_index < max_backdrop_index; backdrop_index++)
         {
             const GlyphQuads::Coords3& transformedBackdropCoords = glyphquad._transformedBackdropCoords[backdrop_index][contextID];
-            if (!transformedBackdropCoords.empty())
+            if (!transformedBackdropCoords->empty())
             {
-                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords.front()));
-                state.drawQuads(0,transformedBackdropCoords.size());
+                state.setVertexPointer( 3, GL_FLOAT, 0, &(transformedBackdropCoords->front()));
+                state.drawQuads(0,transformedBackdropCoords->size());
             }
         }
 
