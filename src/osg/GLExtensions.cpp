@@ -987,6 +987,7 @@ GLExtensions::GLExtensions(unsigned int contextID)
     // Multisample
     isMultisampleSupported = OSG_GLES2_FEATURES || OSG_GL3_FEATURES || isGLExtensionSupported(contextID,"GL_ARB_multisample");
     isMultisampleFilterHintSupported = isGLExtensionSupported(contextID, "GL_NV_multisample_filter_hint");
+    isRenderbufferMultisampleCoverageNVSupported = isGLExtensionSupported(contextID, "GL_NV_framebuffer_multisample_coverage");
 
     setGLExtensionFuncPtr(glSampleCoverage, "glSampleCoverageARB");
 

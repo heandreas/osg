@@ -524,6 +524,7 @@ class OSG_EXPORT GLExtensions : public osg::Referenced
         // Mutlisample
         bool isMultisampleSupported;
         bool isMultisampleFilterHintSupported;
+        bool isRenderbufferMultisampleCoverageNVSupported;
 
         void (GL_APIENTRY * glSampleCoverage) (GLclampf value, GLboolean invert);
 
@@ -542,7 +543,7 @@ class OSG_EXPORT GLExtensions : public osg::Referenced
         bool isFrameBufferObjectSupported;
         bool isPackedDepthStencilSupported;
         bool isRenderbufferMultisampleSupported() const { return glRenderbufferStorageMultisample != 0; }
-        bool isRenderbufferMultisampleCoverageSupported() const { return glRenderbufferStorageMultisampleCoverageNV != 0; }
+        bool isRenderbufferMultisampleCoverageSupported() const { return isRenderbufferMultisampleCoverageNVSupported; }
 
         void (GL_APIENTRY * glBindRenderbuffer) (GLenum, GLuint);
         void (GL_APIENTRY * glDeleteRenderbuffers) (GLsizei n, const GLuint *renderbuffers);
